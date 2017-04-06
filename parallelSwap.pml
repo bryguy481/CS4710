@@ -12,6 +12,11 @@ int A[N];
 proctype swap(int i; int j){
 
 	printf("In Swapper Proc %d with j = %d\n",i,j);
+	
+	//TODO Make this good
+	int temp = A[i]
+	A[i] = A[j];
+	A[j] = temp;
 
 	printf("Swapper Proc %d done\n",i);
 }
@@ -45,5 +50,21 @@ init{
 		:: else -> break;
 	od;
 
+	//this loop checks the number of running processes
+	//once it is 1 you know all the swaps are done and init is the last running process
+	do
+		:: _nr_pr > 1 -> skip;
+		:: else -> break;
+	od;
+
+	printf("Swaps Done\n");
+
+	i = 0;
+	do
+		:: i < N -> 
+			printf("A[%d] = %d\n",i,A[i]);
+			i++;
+		:: else -> break;
+	od;
 	printf("Init Done\n");
 }
