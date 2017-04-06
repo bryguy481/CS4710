@@ -1,3 +1,10 @@
+/*
+* Assignment: Spin Project One
+* Class: CS4710 Sping 2-17
+* Authors: Brian Keith
+*		   Jake Timmer
+*/
+
 int N = 10;
 int A[N];
 
