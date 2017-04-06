@@ -50,12 +50,9 @@ init{
 		:: else -> break;
 	od;
 
-	//this loop checks the number of running processes
-	//once it is 1 you know all the swaps are done and init is the last running process
-	do
-		:: _nr_pr > 1 -> skip;
-		:: else -> break;
-	od;
+	//blocks until one process is running, which will be init
+	_nr_pr == 1;
+	assert(_nr_pr == 1);
 
 	printf("Swaps Done\n");
 
