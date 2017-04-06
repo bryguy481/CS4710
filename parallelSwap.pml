@@ -1,6 +1,7 @@
 int N = 10;
 int A[N];
 
+//swaps A[i] and A[j]
 proctype swap(int i; int j){
 
 	printf("In Swapper Proc %d with j = %d\n",i,j);
@@ -12,25 +13,28 @@ proctype swap(int i; int j){
 init{
 
 	//fill A with distinct values
-	int k = 0;
+	int i = 0;
 	do
-		:: k < N -> 
-			A[k] = k;
-			printf("A[%d] = %d\n",k,k);
-			k++;
+		:: i < N -> 
+			A[i] = i;
+			printf("A[%d] = %d\n",i,i);
+			i++;
 		:: else -> break;
 	od;
 
-	k = 0;
+	//start N swap processes
+	i = 0;
 	do
-		:: k < N ->
-			//start swap process i with j
-			int j;
+		:: i < N ->
 			//gets random number 0 - N-1
+			int j;
 			select(j : 0  .. N-1)
-			assert(j >= 0 && k <= 9);
-			run swap(k,j);
-			k++;
+			assert(j >= 0 && i <= 9);
+
+			//start process i with random index j
+			run swap(i,j);
+			i++;
+
 		:: else -> break;
 	od;
 
