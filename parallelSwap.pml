@@ -8,16 +8,31 @@
 int N = 10;
 int A[N];
 
+//THIS DOESN'T WORK ATM. If we can implement these correctly we are golden
+chan arrayLock = [0] of {byte};
+chan indexLocks[N] = [0] of {byte}
+
 //swaps A[i] and A[j]
 proctype swap(int i; int j){
 
-	printf("In Swapper Proc %d with j = %d\n",i,j);
-	
+	byte rec;
 	//TODO Make this good
-	int temp = A[i]
+
+	//simulates waiting on a lock
+	arrayLock ? rec;
+		indexLocks[i] ? rec;
+		indexLocks[j] ? rec;
+	arrayLock ! 1;
+	
+	printf("In Swapper Proc %d with j = %d\n",i,j);
+	int temp = A[i];
 	A[i] = A[j];
 	A[j] = temp;
 
+	//unlock i and j
+	indexLocks[i] ! 1;
+	indexLocks[j] ! 1;
+	
 	printf("Swapper Proc %d done\n",i);
 }
 
@@ -38,11 +53,14 @@ init{
 	i = 0;
 	do
 		:: i < N ->
+
+			//start all index locks as open
+			indexLocks[i] ! 1;
 			//gets random number 0 - N-1
 			int j;
 			select(j : 0  .. N-1)
 			assert(j >= 0 && i <= 9);
-
+			
 			//start process i with random index j
 			run swap(i,j);
 			i++;
