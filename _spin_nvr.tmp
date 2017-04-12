@@ -1,0 +1,9 @@
+never mutex {    /* !([] (cs)) */
+T0_init:
+	do
+	:: atomic { (! ((cs))) -> assert(!(! ((cs)))) }
+	:: (1) -> goto T0_init
+	od;
+accept_all:
+	skip
+}

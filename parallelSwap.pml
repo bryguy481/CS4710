@@ -5,35 +5,50 @@
 *		   Jake Timmer
 */
 
-int N = 10;
-int A[N];
 
-//THIS DOESN'T WORK ATM. If we can implement these correctly we are golden
-chan arrayLock = [0] of {byte};
-chan indexLocks[N] = [0] of {byte}
+int N = 3;
+int A[N];
+int B[N];
+
+int cs = 0;
+#define mutex (cs <= 1);
+//Represents locks
+byte indexLocks[N];
 
 //swaps A[i] and A[j]
 proctype swap(int i; int j){
 
-	byte rec;
-	//TODO Make this good
 
-	//simulates waiting on a lock
-	arrayLock ? rec;
-		indexLocks[i] ? rec;
-		indexLocks[j] ? rec;
-	arrayLock ! 1;
-	
-	printf("In Swapper Proc %d with j = %d\n",i,j);
+	//atomicly checks if a lock is taken and if so loops. Otherwise take the lock 
+	do
+		:: atomic{
+			if 
+				:: indexLocks[i] == 1 && indexLocks[j] == 1 && cs == false->
+					cs ++;
+					indexLocks[i] = 0;
+					indexLocks[j] = 0;
+					cs --;
+					break;
+				:: else -> 
+					cs ++;
+					printf("Lock %d or %d Taken\n",i,j);
+					cs --;
+			fi;
+			}
+	od;
+			
+	printf("Swapping A[%d] and A[%d]\n",i,j);
 	int temp = A[i];
 	A[i] = A[j];
 	A[j] = temp;
 
 	//unlock i and j
-	indexLocks[i] ! 1;
-	indexLocks[j] ! 1;
+	atomic{
+		indexLocks[i] = 1;
+		indexLocks[j] = 1;
+	}
 	
-	printf("Swapper Proc %d done\n",i);
+	printf("Swapped A[%d] and A[%d]\n",i,j);
 }
 
 
@@ -43,7 +58,11 @@ init{
 	int i = 0;
 	do
 		:: i < N -> 
+
+			indexLocks[i] = 1;
+
 			A[i] = i;
+			assert(A[i] == i);
 			printf("A[%d] = %d\n",i,i);
 			i++;
 		:: else -> break;
@@ -54,11 +73,9 @@ init{
 	do
 		:: i < N ->
 
-			//start all index locks as open
-			indexLocks[i] ! 1;
 			//gets random number 0 - N-1
 			int j;
-			select(j : 0  .. N-1)
+			select(j : 0  .. N-1);
 			assert(j >= 0 && i <= 9);
 			
 			//start process i with random index j
@@ -78,8 +95,17 @@ init{
 	do
 		:: i < N -> 
 			printf("A[%d] = %d\n",i,A[i]);
+			B[A[i]] = B[A[i]] + 1;
+			//assertion to ensure distinction
+			assert(B[A[i]] == 1);
 			i++;
 		:: else -> break;
 	od;
+
+
 	printf("Init Done\n");
+}
+
+ltl mutex {
+	[]mutex;
 }
